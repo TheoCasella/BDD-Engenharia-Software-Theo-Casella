@@ -30,3 +30,9 @@ def step_impl(context):
 @then('a seção de "Pagamento via QR Code" deve aparecer')
 def step_impl(context):
     assert context.comprou is True
+
+@then('eu devo ver o livro "{titulo}" nos resultados')
+def step_impl(context, titulo):
+    # O context.response_data vem da chamada API feita no @when('clico no botão de buscar')
+    titulos_encontrados = [livro['titulo'] for livro in context.response_data]
+    assert titulo in titulos_encontrados, f"Esperava encontrar '{titulo}', mas os resultados foram: {titulos_encontrados}"

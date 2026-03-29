@@ -49,18 +49,39 @@
     </main>
 
     <script>
-        // Lógica simples para o MVP funcionar na tela
-        document.getElementById('btn-comprar').addEventListener('click', function() {
-            document.getElementById('checkout-section').classList.remove('hidden');
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        });
+    document.getElementById('btn-buscar').addEventListener('click', function() {
+        const termo = document.getElementById('input-busca').value;
 
-        document.getElementById('btn-buscar').addEventListener('click', function() {
-            const busca = document.getElementById('input-busca').value.toLowerCase();
-            if(busca && !"dom casmurro".includes(busca)) {
-                alert("Livro não encontrado no protótipo do MVP.");
-            }
-        });
-    </script>
+        // Chamada real para a API de busca que criamos no app.py
+        fetch(`/api/buscar?q=${termo}`)
+            .then(response => response.json())
+            .then(data => {
+                const lista = document.getElementById('lista-livros');
+                lista.innerHTML = ''; // Limpa a lista atual
+
+                if (data.length === 0) {
+                    lista.innerHTML = '<p class="col-span-2 text-center text-gray-500">Nenhum livro encontrado.</p>';
+                    return;
+                }
+
+                data.forEach(livro => {
+                    lista.innerHTML += `
+                        <div class="bg-white p-4 rounded-xl shadow-md border border-gray-100 flex gap-4">
+                            <div class="w-24 h-32 bg-indigo-100 rounded-md flex items-center justify-center text-indigo-400 font-bold">Livro</div>
+                            <div class="flex-1">
+                                <h2 class="text-lg font-bold">${livro.titulo}</h2>
+                                <p class="text-gray-600 text-sm italic">${livro.autor}</p>
+                                <p class="text-indigo-600 font-bold mt-2">R$ ${livro.preco.toFixed(2)}</p>
+                                <div class="mt-4 flex gap-2">
+                                    <button class="text-sm bg-gray-100 px-3 py-1 rounded hover:bg-gray-200">❤️ Favoritar</button>
+                                    <button class="text-sm bg-green-500 text-white px-3 py-1 rounded">Comprar</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+    });
+</script>
 </body>
 </html>
