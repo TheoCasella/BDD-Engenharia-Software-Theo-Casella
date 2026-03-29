@@ -22,66 +22,85 @@
 
     <main class="max-w-4xl mx-auto p-6">
         <div id="lista-livros" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white p-4 rounded-xl shadow-md border border-gray-100 flex gap-4">
-                <div class="w-24 h-32 bg-gray-200 rounded-md flex items-center justify-center text-gray-400">Capa</div>
-                <div class="flex-1">
-                    <h2 class="text-lg font-bold">Dom Casmurro</h2>
-                    <p class="text-gray-600 text-sm italic">Machado de Assis</p>
-                    <p class="text-indigo-600 font-bold mt-2">R$ 45,90</p>
-                    <div class="mt-4 flex gap-2">
-                        <button class="text-sm bg-gray-100 px-3 py-1 rounded hover:bg-gray-200">❤️ Favoritar</button>
-                        <button id="btn-comprar" class="text-sm bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">
-                            Comprar
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <p class="col-span-2 text-center text-gray-400">Use a barra acima para buscar livros.</p>
         </div>
 
-        <div id="checkout-section" class="hidden mt-10 p-6 bg-white rounded-2xl shadow-lg border-2 border-indigo-100 text-center">
-            <h2 class="text-2xl font-bold mb-4">Pagamento via QR Code</h2>
-            <div class="bg-gray-100 w-48 h-48 mx-auto mb-4 flex items-center justify-center border-2 border-dashed border-gray-300">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=LivrariaMVP-Pagamento" alt="QR Code">
+        <div id="checkout-section" class="hidden mt-10 p-8 bg-white rounded-2xl shadow-xl border-2 border-indigo-100 text-center max-w-md mx-auto">
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">Pagamento via QR Code</h2>
+            <p class="text-gray-500 mb-6 text-sm">Escaneie o código PIX para finalizar sua compra</p>
+
+            <div class="bg-white p-4 inline-block rounded-xl border border-gray-200 shadow-inner mb-4">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=LivrariaMVP-Theo-Casella" alt="QR Code PIX">
             </div>
-            <p class="text-gray-500 text-sm">Escaneie o código acima para pagar via PIX</p>
-            <button onclick="document.getElementById('checkout-section').classList.add('hidden')" class="mt-4 text-indigo-600 underline">Voltar</button>
+
+            <div class="text-sm text-indigo-600 font-mono bg-indigo-50 p-2 rounded mb-6 break-all">
+                00020126360014BR.GOV.BCB.PIX...
+            </div>
+
+            <button onclick="document.getElementById('checkout-section').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-600 text-sm underline">
+                Cancelar e voltar
+            </button>
         </div>
     </main>
 
     <script>
-    document.getElementById('btn-buscar').addEventListener('click', function() {
-        const termo = document.getElementById('input-busca').value;
+        // Função para mostrar a seção de Checkout
+        function abrirCheckout() {
+            const checkout = document.getElementById('checkout-section');
+            checkout.classList.remove('hidden');
+            // Rola a página para o QR Code
+            checkout.scrollIntoView({ behavior: 'smooth' });
+        }
 
-        // Chamada real para a API de busca que criamos no app.py
-        fetch(`/api/buscar?q=${termo}`)
-            .then(response => response.json())
-            .then(data => {
-                const lista = document.getElementById('lista-livros');
-                lista.innerHTML = ''; // Limpa a lista atual
+        // Função principal de Busca
+        document.getElementById('btn-buscar').addEventListener('click', function() {
+            const termo = document.getElementById('input-busca').value;
 
-                if (data.length === 0) {
-                    lista.innerHTML = '<p class="col-span-2 text-center text-gray-500">Nenhum livro encontrado.</p>';
-                    return;
-                }
+            // Chama a API do app.py
+            fetch(`/api/buscar?q=${termo}`)
+                .then(response => response.json())
+                .then(data => {
+                    const lista = document.getElementById('lista-livros');
+                    lista.innerHTML = ''; // Limpa os resultados anteriores
 
-                data.forEach(livro => {
-                    lista.innerHTML += `
-                        <div class="bg-white p-4 rounded-xl shadow-md border border-gray-100 flex gap-4">
-                            <div class="w-24 h-32 bg-indigo-100 rounded-md flex items-center justify-center text-indigo-400 font-bold">Livro</div>
-                            <div class="flex-1">
-                                <h2 class="text-lg font-bold">${livro.titulo}</h2>
-                                <p class="text-gray-600 text-sm italic">${livro.autor}</p>
-                                <p class="text-indigo-600 font-bold mt-2">R$ ${livro.preco.toFixed(2)}</p>
-                                <div class="mt-4 flex gap-2">
-                                    <button class="text-sm bg-gray-100 px-3 py-1 rounded hover:bg-gray-200">❤️ Favoritar</button>
-                                    <button class="text-sm bg-green-500 text-white px-3 py-1 rounded">Comprar</button>
+                    if (data.length === 0) {
+                        lista.innerHTML = '<p class="col-span-2 text-center text-gray-500 py-10">Nenhum livro encontrado para sua busca.</p>';
+                        return;
+                    }
+
+                    // Monta cada card de livro dinamicamente
+                    data.forEach(livro => {
+                        lista.innerHTML += `
+                            <div class="bg-white p-4 rounded-xl shadow-md border border-gray-100 flex gap-4 transition hover:shadow-lg">
+                                <div class="w-24 h-32 bg-indigo-50 rounded-md flex items-center justify-center text-indigo-300 font-bold text-xs uppercase p-2 text-center">
+                                    Capa: ${livro.titulo}
+                                </div>
+                                <div class="flex-1">
+                                    <h2 class="text-lg font-bold text-gray-800">${livro.titulo}</h2>
+                                    <p class="text-gray-500 text-sm italic">${livro.autor}</p>
+                                    <p class="text-indigo-600 font-bold mt-2 text-xl">R$ ${livro.preco.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+
+                                    <div class="mt-4 flex gap-2">
+                                        <button class="text-xs bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition">❤️ Favoritar</button>
+                                        <button onclick="abrirCheckout()" class="flex-1 text-sm bg-green-500 text-white px-3 py-2 rounded-lg font-bold hover:bg-green-600 transition shadow-sm">
+                                            Comprar
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
-                });
-            });
-    });
-</script>
+                        `;
+                    });
+                })
+                .catch(err => console.error("Erro na busca:", err));
+        });
+
+        // Permitir busca ao apertar "Enter" no teclado
+        document.getElementById('input-busca').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('btn-buscar').click();
+            }
+        });
+    </script>
 </body>
 </html>
